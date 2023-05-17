@@ -1,4 +1,4 @@
-const client = require("../../kyou.js")
+const client = require("../../index.js")
 const Discord = require("discord.js")
 
 client.on("interactionCreate", interaction => {
