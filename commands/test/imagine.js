@@ -1,21 +1,63 @@
-const Discord = require("discord.js")
+const { ApplicationCommandOptionType } = require('discord.js');
+const axios = require('axios');
 
 module.exports = {
-    name: "imagine",
-    description: "Eu criou uma imagem para você.",
-    type: Discord.ApplicationCommandType.ChatInput,
-    options: [{
-        name: "prompt",
-        description: "Coloque aqui o seu prompt para que eu crie uma imagem.",
-        type: Discord.ApplicationCommandOptionType.String,
-        required: true,
-    }],
+  name: 'cep',
+  description: 'Obtém informações sobre um CEP',
+  options: [
+    {
+      name: 'cep',
+      description: 'CEP a ser pesquisado',
+      type: ApplicationCommandOptionType.String,
+      required: true,
+    },
+  ],
+  
+run: async (client, interaction) => {
+    const cep = interaction.options.getString('cep');
+    const url = `https://viacep.com.br/ws/${cep}/json/`;
 
-    run: async (client, interaction) => {
+    try {
+      const response = await axios.get(url);
 
-        let prompt = interaction.options.getString("prompt")
+      const { cep, logradouro, complemento, bairro, localidade, uf } = response.data;
 
-        console.log("a")
-        interaction.reply({ content: `:x: **|** Seu prompt foi: \`${prompt}\`, mas eu ainda não consigo gerar imagens.` })
+      interaction.reply({
+        embeds: [
+          {
+            title: `Informações para o CEP ${cep}`,
+            fields: [
+              {
+                name: 'Logradouro',
+                value: logradouro,
+              },
+              {
+                name: 'Complemento',
+                value: complemento || 'N/A',
+              },
+              {
+                name: 'Bairro',
+                value: bairro,
+              },
+              {
+                name: 'Cidade',
+                value: localidade,
+              },
+              {
+                name: 'Estado',
+                value: uf,
+              },
+            ],
+          },
+        ],
+      });
+    } catch (error) {
+      console.error(error);
+      interaction.reply({
+        content: 'Ocorreu um erro ao obter informações sobre o CEP. Tente novamente mais tarde.',
+        ephemeral: true,
+      });
     }
-}
+  },
+};
+                  
